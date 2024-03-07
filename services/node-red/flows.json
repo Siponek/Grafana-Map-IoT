@@ -1,0 +1,598 @@
+[
+    {
+        "id": "e43ac8b5844dd4e8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "80f309a75742b3c9",
+        "type": "aedes broker",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "mqtt_port": 1883,
+        "mqtt_ws_bind": "port",
+        "mqtt_ws_port": "",
+        "mqtt_ws_path": "",
+        "cert": "",
+        "key": "",
+        "certname": "",
+        "keyname": "",
+        "persistence_bind": "memory",
+        "dburl": "",
+        "usetls": false,
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "3e2e40b91d7bed38",
+        "type": "mqtt in",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "topic": "/tm/noise",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "64ce07a9bb65dd84",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 320,
+        "y": 320,
+        "wires": [
+            [
+                "a1436225e5cf8945"
+            ]
+        ]
+    },
+    {
+        "id": "47454c0b0f189eb2",
+        "type": "mqtt in",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "topic": "/tm/position",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "64ce07a9bb65dd84",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 330,
+        "y": 380,
+        "wires": [
+            [
+                "a1436225e5cf8945"
+            ]
+        ]
+    },
+    {
+        "id": "fb8fef594a3ff3a7",
+        "type": "inject",
+        "z": "e43ac8b5844dd4e8",
+        "name": "timestamp 2",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "4",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 120,
+        "y": 480,
+        "wires": [
+            [
+                "011c75a3f73c3f69"
+            ]
+        ]
+    },
+    {
+        "id": "011c75a3f73c3f69",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "/tm/temperature",
+        "func": "var tempHighestNumber = 35\nvar tempLowestNumber = 10\nvar temp = Math.floor(Math.random() * (tempHighestNumber - tempLowestNumber) + tempLowestNumber);\n\nmsg.payload = {\n    \"busId\": 0,\n    \"temperature\": temp,\n};\nmsg.topic = \"/tm/temperature\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 480,
+        "wires": [
+            [
+                "7752f1c136752634",
+                "894e6366b72ef563"
+            ]
+        ]
+    },
+    {
+        "id": "55a07d88cfa008fb",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "/tm/crowding",
+        "func": "var minPeople = 0\nvar maxPeople = 50\n\nvar crowd = Math.floor(Math.random() * (maxPeople - minPeople) + minPeople);\nvar startingPeople = startingPeople + crowd;\n\nmsg.payload = {\n    \"busId\": 0,\n    \"crowding\": crowd\n};\n\nmsg.topic = \"/tm/crowding\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 440,
+        "wires": [
+            [
+                "7752f1c136752634",
+                "894e6366b72ef563"
+            ]
+        ]
+    },
+    {
+        "id": "aa94e8e3cc25f192",
+        "type": "inject",
+        "z": "e43ac8b5844dd4e8",
+        "name": "timestamp 1",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.2",
+        "topic": "",
+        "x": 120,
+        "y": 440,
+        "wires": [
+            [
+                "55a07d88cfa008fb"
+            ]
+        ]
+    },
+    {
+        "id": "4ff99377f2359fbd",
+        "type": "mqtt in",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "topic": "/tm/accelerometer",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "64ce07a9bb65dd84",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 350,
+        "y": 260,
+        "wires": [
+            [
+                "a1436225e5cf8945"
+            ]
+        ]
+    },
+    {
+        "id": "a1436225e5cf8945",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "parser",
+        "func": "function convertStringsToFloats(obj) {\n    for (const [key, value] of Object.entries(obj)) {\n        let floatValue = 0;\n        if(typeof value === 'string')\n            floatValue = parseFloat(value.replaceAll(\",\", \".\"));\n        else\n            floatValue = value;\n        obj[key] = floatValue;\n    }\n    return obj;\n}\n\nmsg.payload = convertStringsToFloats(msg.payload);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 300,
+        "wires": [
+            [
+                "7752f1c136752634",
+                "3a88f44da2f50b10",
+                "894e6366b72ef563",
+                "801da2e1094f8060"
+            ]
+        ]
+    },
+    {
+        "id": "7752f1c136752634",
+        "type": "REST Thing",
+        "z": "e43ac8b5844dd4e8",
+        "name": "DataSender",
+        "url": "http://212.78.1.205:8080",
+        "thingname": "bus0",
+        "x": 830,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "3a88f44da2f50b10",
+        "type": "debug",
+        "z": "e43ac8b5844dd4e8",
+        "name": "parser debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "44e95759129217f5",
+        "type": "telegram sender",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "bot": "bbd8c6d6515a11ae",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1530,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1b2494413ffd1459",
+        "type": "telegram command",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "command": "/start",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "bbd8c6d6515a11ae",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 70,
+        "y": 580,
+        "wires": [
+            [
+                "a2e152c54020814a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "58ac9794e2a0e8c1",
+        "type": "influxdb out",
+        "z": "e43ac8b5844dd4e8",
+        "influxdb": "0f36a9b12888f36c",
+        "name": "",
+        "measurement": "chatId",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 570,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "a2e152c54020814a",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "capture chatId ",
+        "func": "var res;\nres = {\n    \"chatId\": msg.payload.chatId\n}\nmsg.payload = res;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 580,
+        "wires": [
+            [
+                "58ac9794e2a0e8c1"
+            ]
+        ]
+    },
+    {
+        "id": "871de84e125208bd",
+        "type": "influxdb in",
+        "z": "e43ac8b5844dd4e8",
+        "influxdb": "0f36a9b12888f36c",
+        "name": "",
+        "query": "SELECT DISTINCT chatId as chatId from chatId",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "organisation",
+        "x": 1070,
+        "y": 520,
+        "wires": [
+            [
+                "70716be91ab20a5b"
+            ]
+        ]
+    },
+    {
+        "id": "70716be91ab20a5b",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "dynamic chatId",
+        "func": "var chatId = [];\nmsg.payload.forEach(element => {\n    chatId.push(element.chatId)\n});\nmsg.telegramMessage.chatId = chatId\nmsg.payload = msg.telegramMessage;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "894e6366b72ef563",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "alertChecker",
+        "func": "function checkAlerts(obj) {\n    var message = \"\"\n    for (const [key, value] of Object.entries(obj)) {\n       \n        if(key == \"temperature\" && (value >= 30 || value <= 15)){\n            message += \"Temperature is \" + value + \" degree\";\n        }\n        if (key == \"noise\" && value >= 70) {\n            message += \"Noise is \" + value + \" decibel\";\n        }\n        if (key == \"crowding\" && value >= 40) {\n            message += \"Bus is overcrowded: \" + value + \" people\";\n        }\n        if (key == \"accelerometerX\" && (value >= 25 || value <= -25)) { //turns\n            message += \"Acceleremoter X is \" + value + \" m/s\\n\";\n        }\n        if (key == \"accelerometerY\" && (value >= 25 || value <= -25)) { //holes\n            message += \"Acceleremoter Y is \" + value + \" m/s\\n\";\n        }\n        if (key == \"accelerometerZ\" && (value >= 30 || value <= -30)) { //accelerations or decelerations\n            message += \"Acceleremoter Z is \" + value + \" m/s\\n\";\n        }\n    }\n    if (message != \"\") {\n        return \"Bus: \" + obj.busId + \"\\n\" + message;\n    }\n    return \"\";\n}\n\nif (checkAlerts(msg.payload) != \"\"){\n    msg.telegramMessage = {\n        \"type\": \"message\",\n        \"chatId\": [],\n        \"content\": checkAlerts(msg.payload)\n    }\n    return msg;\n}\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 520,
+        "wires": [
+            [
+                "871de84e125208bd"
+            ]
+        ]
+    },
+    {
+        "id": "95e02e1461daebd6",
+        "type": "worldmap",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "lat": "",
+        "lon": "",
+        "zoom": "4",
+        "layer": "OSMG",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "showruler": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriDG,UKOS",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 1360,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "801da2e1094f8060",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "position manager",
+        "func": "if(msg.topic == \"/tm/position\") {\n    var json = {\n        \"name\": msg.payload.busId.toString(),\n        \"lat\": msg.payload.latitude,\n        \"lon\": msg.payload.longitude,\n        \"color\": \"#7100ff\"\n    }\n    msg.payload = json;\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 380,
+        "wires": [
+            [
+                "58e73efcf7457d58",
+                "04f01573688cc89e",
+                "0582526929c80c83"
+            ]
+        ]
+    },
+    {
+        "id": "58e73efcf7457d58",
+        "type": "debug",
+        "z": "e43ac8b5844dd4e8",
+        "name": "position debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "cd2c7043f5b91455",
+        "type": "inject",
+        "z": "e43ac8b5844dd4e8",
+        "name": "timestamp 1",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.2",
+        "topic": "",
+        "x": 640,
+        "y": 120,
+        "wires": [
+            [
+                "05801f5e4608fa2b",
+                "f229704aa102f1a1"
+            ]
+        ]
+    },
+    {
+        "id": "05801f5e4608fa2b",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "position simulator 2",
+        "func": "var minlat = 44.0\nvar maxlat = 46.0\n\nvar minlon = 7.0\nvar maxlon = 9.0\n\nvar lat = Math.floor(Math.random() * (maxlat - minlat) + minlat);\nvar lon = Math.floor(Math.random() * (maxlon - minlon) + minlon);\n\n\n\nmsg.payload = { \"name\": \"poppe\", \"lat\": lat, \"lon\": lon }\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f229704aa102f1a1",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "position simulator 1",
+        "func": "var minlat = 43.0\nvar maxlat = 45.0\n\nvar minlon = 7.0\nvar maxlon = 9.0\n\nvar lat = Math.floor(Math.random() * (maxlat - minlat) + minlat);\nvar lon = Math.floor(Math.random() * (maxlon - minlon) + minlon);\n\n\n\nmsg.payload = { \"name\": \"poppe2\", \"lat\": lat, \"lon\": lon, \"color\": \"#7100ff\" }\n    \nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "04f01573688cc89e",
+        "type": "worldmap-tracks",
+        "z": "e43ac8b5844dd4e8",
+        "name": "",
+        "depth": 20,
+        "layer": "combined",
+        "smooth": false,
+        "x": 1190,
+        "y": 420,
+        "wires": [
+            [
+                "95e02e1461daebd6"
+            ]
+        ]
+    },
+    {
+        "id": "0582526929c80c83",
+        "type": "function",
+        "z": "e43ac8b5844dd4e8",
+        "name": "icon",
+        "func": "msg.payload.icon = \"bus\"\nmsg.payload.iconColor = \"#7100ff\"\nmsg.payload.weblink = [{\n        \"name\": \"Alerts\",\n    \"url\": \"http://212.78.1.205:8080/Thingworx/Runtime/index.html?mashup=TM%20Alerts%20Dashboard&forceClose=true&__enableBMF=true&__fromNextGen=58944fb3-95b5-4cba-b84c-d822a172c014&features=\",\n        \"target\": \"_new\"\n    },\n    {\n        \"name\": \"Accelerometers\",\n        \"url\": \"http://212.78.1.205:8080/Thingworx/Runtime/index.html?mashup=TM%20Accelerometers%20Dashboard&forceClose=true&__enableBMF=true&__fromNextGen=07ed83f1-b7c4-4822-88be-e10e6f5a99d0&features=\",\n        \"target\": \"_new\"\n    },\n    {\n        \"name\": \"Noise, Temperature and Crowding\",\n        \"url\": \"http://212.78.1.205:8080/Thingworx/Runtime/index.html?mashup=TM%20Noise-Temp-Crowd%20Dashboard&forceClose=true&__enableBMF=true&__fromNextGen=432927ec-3e18-463b-aa05-eea4c0dbac68&features=\",\n        \"target\": \"_new\"\n    }\n]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1190,
+        "y": 340,
+        "wires": [
+            [
+                "95e02e1461daebd6"
+            ]
+        ]
+    },
+    {
+        "id": "64ce07a9bb65dd84",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "bbd8c6d6515a11ae",
+        "type": "telegram bot",
+        "botname": "transportMonitoringTelegramBot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "updatemode": "polling",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "0f36a9b12888f36c",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "transportMonitoringDB",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    }
+]

@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  node-red:
+    build:
+      context: ./
+      dockerfile: ./dockerfiles/node-red.dockerfile
+    image: nodered/node-red:latest
+    ports:
+      - 1880:1880
+    environment:
+      - FLOWS=flows.json
+    volumes:
+      - ./../services/node-red/flows.json:/data/flows.json
+      - ./../services/node-red:/data
+    depends_on:
+      # - aedes
+      - influxdb
+
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./../services/influxDB/influxdb-init:/docker-entrypoint-initdb.d
+      - ./../services/influxDB/influxdb-data:/var/lib/influxdb2
+
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=myuser
+      - DOCKER_INFLUXDB_INIT_PASSWORD=mypassword
+      - DOCKER_INFLUXDB_INIT_ORG=myorg
+      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=myadmintoken
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_AUTO_ASSIGN_ORG=true
+    depends_on:
+      - influxdb
+    volumes:
+      - ../services/grafana/provisioning:/etc/grafana/provisioning
