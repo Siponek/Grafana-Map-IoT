@@ -146,7 +146,7 @@
         "type": "function",
         "z": "6602f449400436fd",
         "name": "read-coordinates",
-        "func": "// Assuming msg.payload contains the parsed JSON data\nconst elements = msg.payload.elements;\nconst points = elements\n  // Ensure element is a node with lat/lon\n  .filter(el => el.type === \"node\" && el.lat && el.lon && el.tags == undefined)\n  // Map to lat/lon objects\n  .map(node => ({lat: node.lat, lon: node.lon, id: node.id}));\n\n// Replace the payload with points array\nmsg.payload = points;\nreturn msg;\n",
+        "func": "const elements = msg.payload.elements;\nconst points = elements\n  // Filtering nodes without tags\n  .filter(el => el.type === \"node\" && el.lat && el.lon && el.tags === undefined)\n  .filter(el => el.id < 50000000)\n  .map(node => ({\n      lat: node.lat,\n      lon: node.lon,\n      id: String(node.id)\n  }));\n\nmsg.payload = points;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
