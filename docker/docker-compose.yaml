@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   node-red:
+    hostname: nodered
     build:
       context: ./
       dockerfile: ./dockerfiles/node-red.dockerfile
@@ -10,37 +11,46 @@ services:
     environment:
       - FLOWS=flows.json
     volumes:
-      - ./../services/node-red/flows.json:/data/flows.json
       - ./../services/node-red:/data
+      # - ./../services/node-red:/data
     depends_on:
-      # - aedes
       - influxdb
 
   influxdb:
+    hostname: influx
     image: influxdb:latest
     ports:
       - "8086:8086"
     volumes:
       - ./../services/influxDB/influxdb-init:/docker-entrypoint-initdb.d
-      - ./../services/influxDB/influxdb-data:/var/lib/influxdb2
+      # - ./../services/influxDB/influxdb-data:/var/lib/influxdb2
 
-    environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=myuser
-      - DOCKER_INFLUXDB_INIT_PASSWORD=mypassword
-      - DOCKER_INFLUXDB_INIT_ORG=myorg
-      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=myadmintoken
+    env_file:
+      - ./../env/influxdb.env
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+        
 
   grafana:
+    hostname: grafana
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_USERS_AUTO_ASSIGN_ORG=true
+    env_file:
+      - ./../env/grafana.env
     depends_on:
       - influxdb
     volumes:
       - ../services/grafana/provisioning:/etc/grafana/provisioning
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
