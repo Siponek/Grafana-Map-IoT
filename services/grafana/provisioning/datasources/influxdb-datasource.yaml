@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    orgId: 1
+    url: http://influxdb:8086
+    password: mypassword
+    user: myuser
+    # For InfluxDB 2.x, this might be different.
+    database: mydatabase
+    basicAuth: false
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMode: POST
+      version: Flux
+      organization: myorg
+      defaultBucket: mybucket
+      tlsSkipVerify: true
+    secureJsonData:
+      token: myadmintoken
