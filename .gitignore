@@ -1,4 +1,5 @@
 services/influxDB/influxdb-data
 services/node-red/*
 !services/node-red/flows.json
+!services/node-red/corsa_italia.json
 SERVER
